@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Hypergraph Viewer</title>
+  <script src="https://unpkg.com/3d-force-graph"></script>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <script>
+    // Exemplo de hipergrafo: 3 nós conectados em um mesmo hiper-arco + outra aresta simples
+    const originalHypergraph = {
+      nodes: [
+        { id: 'A' },
+        { id: 'B' },
+        { id: 'C' },
+        { id: 'D' }
+      ],
+      hyperedges: [
+        { id: 'E1', connects: ['A', 'B', 'C'] }, // Um hiper-arco
+        { id: 'E2', connects: ['C', 'D'] }       // Outro (pode ser visto como aresta simples)
+      ]
+    };
+
+    // Transforma hipergrafo em grafo bipartido: Nós + hiperarestas como nós intermediários
+    const transformedGraph = {
+      nodes: [],
+      links: []
+    };
+
+    originalHypergraph.nodes.forEach(node => {
+      transformedGraph.nodes.push({ id: node.id, type: 'node' });
+    });
+
+    originalHypergraph.hyperedges.forEach(edge => {
+      transformedGraph.nodes.push({ id: edge.id, type: 'hyperedge' });
+      edge.connects.forEach(targetId => {
+        transformedGraph.links.push({ source: edge.id, target: targetId });
+      });
+    });
+
+    // Cria o grafo
+    const Graph = ForceGraph3D()
+      (document.body)
+      .graphData(transformedGraph)
+      .nodeAutoColorBy('type')
+      .nodeLabel(node => `${node.type}: ${node.id}`)
+      .onNodeClick(node => alert(`Clicked on ${node.type}: ${node.id}`));
+  </script>
+</body>
+</html>
